@@ -46,9 +46,9 @@ STATICFILES_DIRS=[STATIC_DIR]
 SECRET_KEY = 'django-insecure-7*th(flh(&v$8bwy75of+tixa#rfd(a%!^yy@)$9*z=1e_bd)8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['.render.com', '127.0.0.1']
+ALLOWED_HOSTS = ['https://jarvis-ai-bot-gtgs.onrender.com', '127.0.0.1']
 
 
 # Application definition

@@ -1,0 +1,5 @@
+Django
+gunicorn
+python-dotenv
+google-genai
+# Add any other libraries your code uses

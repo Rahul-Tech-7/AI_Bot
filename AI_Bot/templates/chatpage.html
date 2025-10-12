@@ -1,0 +1,696 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <title>JARVIS - Virtual Assistant</title>
+    <style>
+        /* THEME VARIABLES (Minimal Black/Gray/Subtle Cyan) */
+        :root {
+            --color-black-bg: #000000;
+            --color-dark-panel: #111111; /* Slightly lighter for sidebar/input */
+            --color-subtle-cyan: #008c99; /* Very muted cyan for accents */
+            --color-text-light: #e0e0e0; /* Off-white for main text */
+            --color-text-dark: #666666; /* Dark gray for history text */
+            --color-code-bg: #0d0d0d; /* Background for code blocks (almost black) */
+            --color-user-text: #ffffff; /* Pure white for user input */
+            --sidebar-width: 250px;
+        }
+
+        /* GLOBAL STYLES (FULL WINDOW) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+           font-family: 'Google Sans', sans-serif;
+            font-weight: 400;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: var(--color-black-bg);
+            color: var(--color-text-light);
+            display: flex;
+            align-items: stretch;
+        }
+
+        h3 {
+            font-weight: 500;
+        }
+
+        /* MAIN LAYOUT (FULL SCREEN) */
+        .main-layout {
+            display: flex;
+            width: 100%; 
+            height: 100vh; 
+            background: var(--color-black-bg);
+        }
+
+        /* SIDEBAR (HISTORY PANEL) */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background: var(--color-dark-panel);
+            border-right: 1px solid #333333; /* Darker border */
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            color: var(--color-text-dark);
+        }
+
+        .sidebar h3 {
+            color: var(--color-text-light);
+            margin-bottom: 10px;
+            text-align: left; 
+            font-size: 1.1em;
+        }
+        
+        .new-chat-button {
+            background-color: transparent; 
+            color: var(--color-text-light); 
+            border: 1px solid #333333;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            text-align: left;
+        }
+
+        .new-chat-button:hover {
+            background-color: #2b2b2b;
+            border-color: var(--color-subtle-cyan);
+        }
+        
+        .new-chat-button i {
+            margin-right: 8px;
+            color: var(--color-subtle-cyan);
+        }
+
+        .chat-history-list {
+            flex-grow: 1; 
+            overflow-y: auto;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .chat-history-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9em;
+            color: var(--color-text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-history-item:hover, .chat-history-item.active {
+            background-color: #2b2b2b;
+            color: var(--color-text-light);
+        }
+
+        /* CHAT AREA */
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--color-black-bg);
+            position: relative;
+        }
+
+        /* Message List is Centered and Padded */
+        .message-list {
+            flex-grow: 1;
+            padding: 40px 10%; 
+            overflow-y: auto;
+            list-style: none;
+            padding-bottom: 100px; 
+            max-width: 1000px; /* Constrain content width */
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* MESSAGE STYLES (MODIFIED FOR BOX/NO-BOX) */
+        .message-item {
+            margin-bottom: 30px; 
+            display: flex;
+            align-items: flex-start;
+            max-width: 100%;
+        }
+
+        /* AI Message: Left-aligned, no box/background */
+        .message-item.ai-message {
+            margin-right: auto;
+            flex-direction: row; 
+            text-align: left;
+        }
+        
+        /* User Message: Right-aligned, with box/background */
+        .message-item.user-message {
+            margin-left: auto;
+            flex-direction: row-reverse; /* Align icon/content to the right */
+            text-align: right;
+        }
+        
+        /* HIDDEN ICONS (Removed the AI/U circles as requested) */
+        .message-item .icon {
+            display: none; /* Hide the AI/U circles */
+        }
+        
+        /* Default content styles (for AI - no background/box) */
+        .message-item .content {
+            padding: 0; 
+            border-radius: 0;
+            box-shadow: none;
+            max-width: 750px;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 1.1em;
+            color: var(--color-text-light);
+            text-align: left; /* AI content is left-aligned */
+        }
+        
+        /* User Content Styles (ADD THE BOX/BACKGROUND) */
+        .message-item.user-message .content {
+            /* Add the box styles to the user message */
+            background-color: var(--color-subtle-cyan); 
+            color: var(--color-black-bg); /* Dark text on light-cyan background */
+            padding: 10px 15px; 
+            border-radius: 15px 15px 0 15px; /* Bubble style */
+            text-align: left; /* Ensure the text flows left-to-right inside the bubble */
+            font-weight: 500;
+        }
+
+        /* CODE BLOCK STYLING (The Box with Copy Button) */
+        .code-block-container {
+            position: relative;
+            background-color: var(--color-code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            margin-top: 10px; /* Space above code block */
+            font-size: 0.9em;
+            overflow-x: auto;
+            text-align: left; /* Important for code blocks to align left */
+        }
+        
+        .code-block-container pre {
+            margin: 0;
+            padding: 0;
+            background: none;
+            color: var(--color-text-light);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+        }
+        
+        .code-copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #333;
+            color: var(--color-text-light);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s, background 0.2s;
+            z-index: 10;
+        }
+        
+        .code-copy-btn:hover {
+            opacity: 1.0;
+            background: var(--color-subtle-cyan);
+            color: var(--color-black-bg);
+        }
+
+
+        /* INPUT AREA (Fixed to bottom) */
+        .chat-input-area {
+            position: fixed;
+            bottom: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            display: flex;
+            padding: 15px 5%; 
+            border-top: 1px solid #333;
+            background: var(--color-black-bg);
+            justify-content: center;
+            z-index: 20;
+        }
+        
+        .input-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        #InpBtn {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: 1px solid #333;
+            border-radius: 25px;
+            background: var(--color-dark-panel);
+            color: var(--color-text-light);
+            margin-right: 10px;
+            outline: none;
+            box-shadow: none; 
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+        
+        #InpBtn:focus {
+            border-color: var(--color-subtle-cyan);
+        }
+
+        #Btn {
+            background: var(--color-subtle-cyan);
+            color: var(--color-black-bg);
+            border: none;
+            border-radius: 25px;
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        #Btn:hover { background: #00b4c7; }
+
+        /* SPLASH SCREEN STYLES (GIF IN MIDDLE) */
+        .splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--color-black-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .splash-screen img {
+            width: 250px; 
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 25px var(--color-subtle-cyan)); /* Use subtle cyan shadow */
+            margin-bottom: 30px;
+        }
+
+        .splash-screen h1 {
+            color: var(--color-subtle-cyan);
+            font-size: 3em;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .splash-screen p {
+            color: var(--color-text-dark);
+        }
+
+        .splash-screen button {
+            background: var(--color-subtle-cyan);
+            color: var(--color-black-bg);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 20px rgba(0, 140, 153, 0.4);
+        }
+        .splash-screen button:hover { transform: scale(1.05); }
+
+        /* TYPING INDICATOR */
+        .typing-indicator {
+            display: none; 
+            margin-bottom: 20px;
+            align-self: flex-start;
+            padding-left: 10%;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .typing-indicator-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* The AI icon for the indicator is kept, but the message icons are removed */
+        .typing-indicator .icon {
+            background-color: var(--color-subtle-cyan);
+            margin-right: 15px; 
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--color-black-bg);
+        }
+        
+        .typing-indicator .thinking-dots {
+            display: flex;
+            align-items: center;
+            background-color: var(--color-dark-panel);
+            padding: 12px 18px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            box-shadow: none;
+        }
+
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: var(--color-subtle-cyan);
+            border-radius: 50%;
+            margin: 0 4px;
+            display: inline-block;
+            animation: pulse 1s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.0); opacity: 1.0; }
+            50% { transform: scale(0.8); opacity: 0.5; }
+        }
+        
+        /* Media Query for smaller screens (to adjust padding/sidebar) */
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 60px; /* Collapse sidebar */
+            }
+            .sidebar {
+                width: var(--sidebar-width);
+                min-width: var(--sidebar-width);
+            }
+            .sidebar h3, .new-chat-button span, .chat-history-item {
+                display: none; /* Hide text in collapsed sidebar */
+            }
+            .new-chat-button {
+                text-align: center;
+                padding: 10px 0;
+            }
+            .new-chat-button i {
+                margin-right: 0;
+            }
+            .chat-history-list {
+                border-top: none;
+                padding-top: 0;
+            }
+            .chat-input-area {
+                left: var(--sidebar-width);
+                padding: 15px 20px;
+            }
+            .message-list, .typing-indicator {
+                padding: 20px 20px 100px 20px; /* Less padding on small screen */
+            }
+        }
+        
+    </style>
+</head>
+
+<body>
+
+    <div class="main-layout">
+        <aside class="sidebar">
+            <h3>JARVIS History</h3>
+            
+            <button id="new-chat-btn" class="new-chat-button">
+                <i class="bi bi-plus-circle-fill"></i> <span>New Chat</span>
+            </button>
+
+            <ul id="chat-history-list" class="chat-history-list">
+                </ul>
+        </aside>
+
+        <section class="chat-area">
+
+            <div id="splash-screen" class="splash-screen">
+                <img src="{% static 'images/1.gif' %}" alt="JARVIS AI" id="splash-gif">
+                <h1>J A R V I S</h1>
+                <p>I'm a Virtual Assistant, how may I help you?</p>
+                <button id="start-chat-btn">Start Chatting</button>
+            </div>
+
+            <ul id="message-list" class="message-list" style="display: none;">
+                </ul>
+            
+            <div id="typing-indicator" class="typing-indicator">
+                <div class="typing-indicator-wrapper">
+                    <div class="icon">AI</div>
+                    <div class="thinking-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area" id="input-area" style="display: none;">
+                <div class="input-wrapper">
+                    <input type="text" id="InpBtn" placeholder="Ask anything..." autofocus>
+                    <button id="Btn"><i class="bi bi-send-fill"></i></button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // *** Utility Function for CSRF Token ***
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+
+        // *** DOM Elements ***
+        const messageList = document.getElementById('message-list');
+        const inputField = document.getElementById('InpBtn');
+        const sendButton = document.getElementById('Btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const splashScreen = document.getElementById('splash-screen');
+        const startChatButton = document.getElementById('start-chat-btn');
+        const newChatButton = document.getElementById('new-chat-btn');
+        const inputArea = document.getElementById('input-area');
+
+        let chatActive = false;
+
+        // Function to scroll to the bottom of the chat window
+        function scrollToBottom() {
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+
+        // Function to start a new chat (hide splash, show chat)
+        function startNewChat() {
+            splashScreen.style.display = 'none';
+            messageList.style.display = 'block';
+            inputArea.style.display = 'flex';
+            
+            // Clear current messages for a fresh start and add welcome
+            // The welcome message is AI, so it uses the 'ai-message' class and is unboxed
+            messageList.innerHTML = `
+                <li class="message-item ai-message">
+                    <div class="icon">AI</div>
+                    <div class="content">Hello! I am JARVIS, your virtual assistant. How can I help you today?</div>
+                </li>`;
+            
+            scrollToBottom();
+            inputField.focus();
+            chatActive = true;
+        }
+        
+        // Function to go back to the splash screen (for "New Chat" button)
+        function resetChatUI() {
+            splashScreen.style.display = 'flex';
+            messageList.style.display = 'none';
+            inputArea.style.display = 'none';
+            messageList.innerHTML = '';
+            chatActive = false;
+            typingIndicator.style.display = 'none';
+        }
+
+        // 💡💡💡 CORE LOGIC FOR CODE BLOCKS 💡💡💡
+        function formatCodeBlocks(text) {
+            // Regex to find content between ``` and ``` (handles language hint optionally)
+            const codeBlockRegex = /```(?:\w+)?\n([\s\S]*?)\n```/g;
+
+            // Function to generate the HTML for a code block
+            function createCodeHtml(match, codeContent) {
+                const sanitizedCode = codeContent.trim();
+                
+                return `
+                    <div class="code-block-container">
+                        <button class="code-copy-btn" onclick="copyCode(this)">
+                            <i class="bi bi-files"></i> Copy
+                        </button>
+                        <pre>${sanitizedCode}</pre>
+                    </div>
+                `;
+            }
+
+            const htmlContent = text.replace(codeBlockRegex, createCodeHtml);
+
+            return htmlContent;
+        }
+        
+        // Copy to clipboard function (called by the copy button)
+        window.copyCode = function(button) {
+            const preElement = button.nextElementSibling; 
+            const textToCopy = preElement.innerText;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                button.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="bi bi-files"></i> Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                button.innerHTML = 'Error!';
+            });
+        };
+        // 💡💡💡 END CORE LOGIC FOR CODE BLOCKS 💡💡💡
+
+
+        // Function to add a message to the chat
+        function appendMessage(text, isUser = true) {
+            const listItem = document.createElement('li');
+            listItem.classList.add('message-item');
+            listItem.classList.add(isUser ? 'user-message' : 'ai-message');
+            
+            // The icon is now hidden by CSS, but we keep the element structure for consistency
+            const iconDiv = document.createElement('div');
+            iconDiv.classList.add('icon');
+            iconDiv.innerText = isUser ? 'U' : 'AI';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('content');
+            
+            if (isUser) {
+                // User text is plain text, which will be styled as a box by CSS
+                contentDiv.innerText = text;
+                listItem.appendChild(contentDiv);
+                listItem.appendChild(iconDiv); // Icon is hidden but kept in structure
+            } else {
+                // AI content is processed for code blocks and is unboxed
+                contentDiv.innerHTML = formatCodeBlocks(text);
+                listItem.appendChild(iconDiv); // Icon is hidden but kept in structure
+                listItem.appendChild(contentDiv);
+            }
+
+            messageList.appendChild(listItem);
+            scrollToBottom();
+        }
+
+        // The AJAX call to your Django backend
+        async function fetchData(userInput) {
+            if (!chatActive) return;
+
+            try {
+                // 1. Display user message immediately
+                appendMessage(userInput, true);
+                
+                // 2. Clear input field immediately after displaying
+                inputField.value = '';
+
+                // 3. Show typing indicator 
+                typingIndicator.style.display = 'flex'; 
+                scrollToBottom();
+
+                const response = await fetch("/response/", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken 
+                    },
+                    body: JSON.stringify({ user_input: userInput })
+                });
+
+                const data = await response.json();
+                
+                // 4. Hide typing indicator
+                typingIndicator.style.display = 'none';
+
+                // 5. Display AI response, running it through the code block formatter
+                appendMessage(data.reply, false);
+
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                typingIndicator.style.display = 'none'; 
+                appendMessage("Error: Could not connect to the AI. Please check the server.", false);
+            }
+        }
+
+        // Event listener for the Send button
+        sendButton.addEventListener('click', () => {
+            const input = inputField.value.trim();
+            if (input !== '') {
+                fetchData(input);
+            }
+        });
+
+        // Event listener for the Enter key in the input box
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const input = inputField.value.trim();
+                if (input !== '') {
+                    fetchData(input);
+                }
+            }
+        });
+        
+        // Event listener for the "Start Chatting" button on the splash screen
+        startChatButton.addEventListener('click', startNewChat);
+
+        // Event listener for the "New Chat" button in the sidebar (resets the UI)
+        newChatButton.addEventListener('click', resetChatUI);
+        
+        // Initial setup on load (show splash screen)
+        window.onload = resetChatUI;
+    </script>
+</body>
+
+</html>

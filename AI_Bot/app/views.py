@@ -3,6 +3,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 import json
 import google.generativeai as genai
 
@@ -19,7 +20,7 @@ def chatpage(request):
     """Renders the main chat interface template."""
     return render(request, 'chatpage.html')
 
-
+@csrf_exempt
 def get_ai_response(request):
     """Handles the user's message, sends it to the AI, and returns the response."""
     if request.method == 'POST':

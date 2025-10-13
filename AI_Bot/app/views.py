@@ -56,8 +56,8 @@ def get_ai_response(request):
             return JsonResponse({"reply": ai_reply})
 
         except Exception as e:
-            # Log the full error to your Render logs for debugging
-            print(f"AI API Error: {e}") 
+           # 🚨 THE FIX: Print the actual error object 'e' for logging
+            print(f"AI API Error (Detailed): {e}")
             # Return the specific error message to the frontend
             return JsonResponse({"reply": "Error: Could not connect to the AI. Please check the server."}, status=500)
     

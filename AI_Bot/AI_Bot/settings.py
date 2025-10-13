@@ -13,19 +13,22 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 # for llm
-from dotenv import load_dotenv
+
 
 # Load environment variables from .env file
-load_dotenv()
+
 
 # Retrieve the API Key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+# We will check it more safely below (optional, but clean):
 if not GEMINI_API_KEY:
-    # This will raise an error if the key is missing, forcing you to secure it.
-    raise EnvironmentError("GEMINI_API_KEY not found in environment variables.")
+    print("Warning: GEMINI_API_KEY is not set.") 
 
 
+# Add this crucial line to ensure the key is always a string when accessed by views.py
+# If GEMINI_API_KEY is None, the view will fail safely.
+GEMINI_API_KEY = GEMINI_API_KEY or ""
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

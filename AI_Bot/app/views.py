@@ -2,18 +2,16 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.conf import settings
 import json
-# FIX: Use this explicit import pattern to resolve namespace issues
-import google.genai as genai 
+# The fix is to use the top-level import and specify the path later
+import google.genai 
 from django.views.decorators.csrf import csrf_exempt 
 
-# NEW: Create a Client object for API interaction
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
+# Configure the Gemini API client once using the API key from settings.py
+# Use the full path: google.genai.Client()
+client = google.genai.Client(api_key=settings.GEMINI_API_KEY)
 
 # Use a global variable to maintain conversation context (chat history)
-# The 'gemini-2.5-flash' model is fast and powerful for general and coding tasks.
-# NEW: Start the chat session using the client's 'chats' service.
 global_chat_session = client.chats.create(model='gemini-2.5-flash')
-
 
 def chatpage(request):
     """Renders the main chat interface template."""

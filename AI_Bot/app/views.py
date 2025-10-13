@@ -13,8 +13,7 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 # Use a global variable to maintain conversation context (chat history)
 # The 'gemini-2.5-flash' model is fast and powerful for general and coding tasks.
 model = genai.GenerativeModel('gemini-2.5-flash')
-# This starts a new chat session, which automatically keeps the message history.
-global_chat_session = model.start_chat(history=[])
+
 
 def chatpage(request):
     """Renders the main chat interface template."""
@@ -32,19 +31,35 @@ def get_ai_response(request):
             if not user_input:
                 return JsonResponse({"reply": "Please enter a message."}, status=400)
 
-            # 2. Send the message to the AI and wait for the reply
-            # The global_chat_session sends the user_input and all previous history.
-            response = global_chat_session.send_message(user_input)
+            # --- 🚨 THE KEY FIX: Session-based History Management ---
             
-            # 3. Extract the AI's text response
+            # 2. Retrieve history from the Django session (or start fresh)
+            # The history is stored as a list of Content objects.
+            chat_history_data = request.session.get('chat_history', [])
+
+            # 3. Start a NEW chat session, injecting the history
+            # The model variable is defined globally and is reusable.
+            chat_session = model.start_chat(history=chat_history_data)
+
+            # 4. Send the message and get the response
+            # The chat_session automatically sends the user_input and all previous history.
+            response = chat_session.send_message(user_input)
+            
+            # 5. Update and Save History back to the Django session
+            # This fetches the full, updated history from the chat session object.
+            request.session['chat_history'] = chat_session.get_history() 
+
+            # 6. Extract the AI's text response
             ai_reply = response.text
 
-            # 4. Return the AI's reply as a JSON response to the frontend
+            # 7. Return the AI's reply as a JSON response to the frontend
             return JsonResponse({"reply": ai_reply})
 
         except Exception as e:
-            print(f"AI API Error: {e}")
-            return JsonResponse({"reply": "Sorry, I ran into an error. Please try again."}, status=500)
+            # Log the full error to your Render logs for debugging
+            print(f"AI API Error: {e}") 
+            # Return the specific error message to the frontend
+            return JsonResponse({"reply": "Error: Could not connect to the AI. Please check the server."}, status=500)
     
     # Handle GET requests (e.g., if a user navigates directly to the URL)
     return JsonResponse({"reply": "Method not allowed"}, status=405)

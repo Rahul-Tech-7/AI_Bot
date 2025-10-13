@@ -20,6 +20,6 @@ from app.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('chatpage/',chatpage,name='chatpage'),
+    path('',chatpage,name='chatpage'),
     path('response/', get_ai_response, name='ai_response'),
 ]

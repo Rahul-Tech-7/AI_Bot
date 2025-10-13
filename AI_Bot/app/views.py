@@ -1,28 +1,29 @@
-# views.py
-
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
 import json
-import google.generativeai as genai
+# REMOVE: import google.generativeai as genai
+# USE NEW SDK:
+from google import genai 
+from django.views.decorators.csrf import csrf_exempt # IMPORTANT: keep this!
 
 # Configure the Gemini API client once using the API key from settings.py
-# This configuration is crucial for the bot to work.
-genai.configure(api_key=settings.GEMINI_API_KEY)
+# The new SDK uses a client object.
+client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
 # Use a global variable to maintain conversation context (chat history)
 # The 'gemini-2.5-flash' model is fast and powerful for general and coding tasks.
-model = genai.GenerativeModel('gemini-2.5-flash')
 
-global_chat_session = model.start_chat()
+# NEW WAY to start a chat session using the client.
+global_chat_session = client.chats.create(model='gemini-2.5-flash')
 
 
 def chatpage(request):
     """Renders the main chat interface template."""
     return render(request, 'chatpage.html')
 
-@csrf_exempt
+
+@csrf_exempt # Ensure this decorator is still here!
 def get_ai_response(request):
     """Handles the user's message, sends it to the AI, and returns the response."""
     if request.method == 'POST':
@@ -34,35 +35,20 @@ def get_ai_response(request):
             if not user_input:
                 return JsonResponse({"reply": "Please enter a message."}, status=400)
 
-            # --- 🚨 THE KEY FIX: Session-based History Management ---
+            # 2. Send the message to the AI and wait for the reply
+            # The global_chat_session sends the user_input and all previous history.
+            response = global_chat_session.send_message(user_input)
             
-            # 2. Retrieve history from the Django session (or start fresh)
-            # The history is stored as a list of Content objects.
-            chat_history_data = request.session.get('chat_history', [])
-
-            # 3. Start a NEW chat session, injecting the history
-            # The model variable is defined globally and is reusable.
-            chat_session = model.start_chat(history=chat_history_data)
-
-            # 4. Send the message and get the response
-            # The chat_session automatically sends the user_input and all previous history.
-            response = chat_session.send_message(user_input)
-            
-            # 5. Update and Save History back to the Django session
-            # This fetches the full, updated history from the chat session object.
-            request.session['chat_history'] = chat_session.get_history() 
-
-            # 6. Extract the AI's text response
+            # 3. Extract the AI's text response
             ai_reply = response.text
 
-            # 7. Return the AI's reply as a JSON response to the frontend
+            # 4. Return the AI's reply as a JSON response to the frontend
             return JsonResponse({"reply": ai_reply})
 
         except Exception as e:
-           # 🚨 THE FIX: Print the actual error object 'e' for logging
-            print(f"AI API Error (Detailed): {e}")
-            # Return the specific error message to the frontend
-            return JsonResponse({"reply": "Error: Could not connect to the AI. Please check the server."}, status=500)
+            print(f"AI API Error: {e}")
+            # You may want to log the specific error `e` on Render to debug
+            return JsonResponse({"reply": "Sorry, I ran into an error. Please try again."}, status=500)
     
-    # Handle GET requests (e.g., if a user navigates directly to the URL)
-    return JsonResponse({"reply": "Method not allowed"}, status=405)
+    # Handle GET requests (optional)
+    return JsonResponse({"reply": "This endpoint requires a POST request."}, status=405)

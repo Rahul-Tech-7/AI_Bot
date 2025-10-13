@@ -354,11 +354,14 @@
         .typing-indicator {
             display: none; 
             margin-bottom: 20px;
-            align-self: flex-start;
-            padding-left: 10%;
+            /* Adjust this to align with the message-list padding */
+            align-self: flex-start; 
+            padding-left: 10%; 
             max-width: 1000px;
             width: 100%;
-            margin: 0 auto;
+            margin: 0 auto; /* Center the indicator wrapper */
+            position: absolute; /* Position it correctly above the input */
+            bottom: 85px; /* Adjust to be above the fixed input area */
         }
         
         .typing-indicator-wrapper {
@@ -399,7 +402,17 @@
             border-radius: 50%;
             margin: 0 4px;
             display: inline-block;
+            opacity: 0.5; /* Start slightly transparent */
             animation: pulse 1s infinite ease-in-out;
+        }
+        
+        /* Stagger the animation timing for the three dots */
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
         }
 
         @keyframes pulse {
@@ -434,8 +447,16 @@
                 left: var(--sidebar-width);
                 padding: 15px 20px;
             }
-            .message-list, .typing-indicator {
+            .message-list {
                 padding: 20px 20px 100px 20px; /* Less padding on small screen */
+            }
+            /* Adjust typing indicator position for smaller screens */
+            .typing-indicator {
+                left: 0;
+                right: 0;
+                padding-left: 20px;
+                bottom: 85px; 
+                max-width: 100%;
             }
         }
         
@@ -633,12 +654,16 @@
                 // 1. Display user message immediately
                 appendMessage(userInput, true);
                 
-                // 2. Clear input field immediately after displaying
+                // 2. Clear input field immediately
                 inputField.value = '';
 
-                // 3. Show typing indicator 
+                // 3. Show typing indicator and scroll to make sure it's visible
                 typingIndicator.style.display = 'flex'; 
-                scrollToBottom();
+                scrollToBottom(); 
+                
+                // 4. Disable input/send button while waiting
+                inputField.disabled = true;
+                sendButton.disabled = true;
 
                 const response = await fetch("/response/", {
                     method: "POST",
@@ -651,15 +676,25 @@
 
                 const data = await response.json();
                 
-                // 4. Hide typing indicator
+                // 5. Hide typing indicator
                 typingIndicator.style.display = 'none';
+                
+                // 6. Re-enable input/send button
+                inputField.disabled = false;
+                sendButton.disabled = false;
+                inputField.focus();
 
-                // 5. Display AI response, running it through the code block formatter
+                // 7. Display AI response, running it through the code block formatter
                 appendMessage(data.reply, false);
 
             } catch (err) {
                 console.error("Fetch Error:", err);
+                
+                // Ensure everything is reset on error
                 typingIndicator.style.display = 'none'; 
+                inputField.disabled = false;
+                sendButton.disabled = false;
+                
                 appendMessage("Error: Could not connect to the AI. Please check the server.", false);
             }
         }

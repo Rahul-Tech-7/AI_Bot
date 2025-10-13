@@ -15,6 +15,8 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 # The 'gemini-2.5-flash' model is fast and powerful for general and coding tasks.
 model = genai.GenerativeModel('gemini-2.5-flash')
 
+global_chat_session = model.start_chat()
+
 
 def chatpage(request):
     """Renders the main chat interface template."""

@@ -354,14 +354,13 @@
         .typing-indicator {
             display: none; 
             margin-bottom: 20px;
-            /* Adjust this to align with the message-list padding */
-            align-self: flex-start; 
-            padding-left: 10%; 
+            align-self: flex-start;
+            padding-left: 10%;
             max-width: 1000px;
             width: 100%;
-            margin: 0 auto; /* Center the indicator wrapper */
-            position: absolute; /* Position it correctly above the input */
-            bottom: 85px; /* Adjust to be above the fixed input area */
+            margin: 0 auto;
+            position: absolute;
+            bottom: 85px; 
         }
         
         .typing-indicator-wrapper {
@@ -402,11 +401,11 @@
             border-radius: 50%;
             margin: 0 4px;
             display: inline-block;
-            opacity: 0.5; /* Start slightly transparent */
+            opacity: 0.5; /* Added: Start slightly transparent */
             animation: pulse 1s infinite ease-in-out;
         }
         
-        /* Stagger the animation timing for the three dots */
+        /* Added: Stagger the animation timing for the three dots */
         .dot:nth-child(2) {
             animation-delay: 0.2s;
         }
@@ -447,16 +446,13 @@
                 left: var(--sidebar-width);
                 padding: 15px 20px;
             }
-            .message-list {
+            .message-list, .typing-indicator {
                 padding: 20px 20px 100px 20px; /* Less padding on small screen */
+                /* Fix: Ensure typing indicator also respects new bottom positioning on small screens */
+                bottom: 85px;
             }
-            /* Adjust typing indicator position for smaller screens */
             .typing-indicator {
-                left: 0;
-                right: 0;
                 padding-left: 20px;
-                bottom: 85px; 
-                max-width: 100%;
             }
         }
         
@@ -574,7 +570,19 @@
             typingIndicator.style.display = 'none';
         }
 
-        // 💡💡💡 CORE LOGIC FOR CODE BLOCKS 💡💡💡
+        // 💡💡💡 NEW FUNCTION: Format subtopics with bold tags (<b>) 💡💡💡
+        function formatSubtopics(text) {
+            // This regex finds the pattern: * [Text]:
+            // E.g., it captures "Identity" from "* Identity: "
+            const subtopicRegex = /\* (.*?):/g;
+            
+            // The replacement wraps the captured group (the subtopic name) in bold tags.
+            // Result: "<b>* Identity:</b>"
+            return text.replace(subtopicRegex, '<b>* $1:</b>');
+        }
+        // 💡💡💡 END NEW FUNCTION 💡💡💡
+
+        // 💡💡💡 CORE LOGIC FOR CODE BLOCKS (Existing Function) 💡💡💡
         function formatCodeBlocks(text) {
             // Regex to find content between ``` and ``` (handles language hint optionally)
             const codeBlockRegex = /```(?:\w+)?\n([\s\S]*?)\n```/g;
@@ -636,8 +644,10 @@
                 listItem.appendChild(contentDiv);
                 listItem.appendChild(iconDiv); // Icon is hidden but kept in structure
             } else {
-                // AI content is processed for code blocks and is unboxed
-                contentDiv.innerHTML = formatCodeBlocks(text);
+                // 💡💡💡 CHANGE APPLIED HERE: Chain subtopic formatting before code blocks 💡💡💡
+                let processedText = formatSubtopics(text);
+                contentDiv.innerHTML = formatCodeBlocks(processedText);
+                
                 listItem.appendChild(iconDiv); // Icon is hidden but kept in structure
                 listItem.appendChild(contentDiv);
             }
@@ -654,17 +664,17 @@
                 // 1. Display user message immediately
                 appendMessage(userInput, true);
                 
-                // 2. Clear input field immediately
+                // 2. Clear input field immediately after displaying
                 inputField.value = '';
 
-                // 3. Show typing indicator and scroll to make sure it's visible
+                // 3. Show typing indicator 
                 typingIndicator.style.display = 'flex'; 
-                scrollToBottom(); 
-                
-                // 4. Disable input/send button while waiting
+                scrollToBottom();
+
+                // Disable input/send button while waiting
                 inputField.disabled = true;
                 sendButton.disabled = true;
-
+                
                 const response = await fetch("/response/", {
                     method: "POST",
                     headers: {
@@ -676,16 +686,17 @@
 
                 const data = await response.json();
                 
-                // 5. Hide typing indicator
+                // 4. Hide typing indicator
                 typingIndicator.style.display = 'none';
+
+                // 5. Display AI response, running it through the new formatting chain
+                appendMessage(data.reply, false);
                 
                 // 6. Re-enable input/send button
                 inputField.disabled = false;
                 sendButton.disabled = false;
                 inputField.focus();
 
-                // 7. Display AI response, running it through the code block formatter
-                appendMessage(data.reply, false);
 
             } catch (err) {
                 console.error("Fetch Error:", err);

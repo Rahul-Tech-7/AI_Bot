@@ -8,20 +8,28 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+
     <title>JARVIS - Virtual Assistant</title>
     <style>
         /* THEME VARIABLES (Minimal Black/Gray/Subtle Cyan) */
         :root {
             --color-black-bg: #000000;
-            --color-dark-panel: #111111; /* Slightly lighter for sidebar/input */
-            --color-subtle-cyan: #008c99; /* Very muted cyan for accents */
-            --color-text-light: #e0e0e0; /* Off-white for main text */
-            --color-text-dark: #666666; /* Dark gray for history text */
-            --color-code-bg: #0d0d0d; /* Background for code blocks (almost black) */
-            --color-user-text: #ffffff; /* Pure white for user input */
+            --color-dark-panel: #111111;
+            /* Slightly lighter for sidebar/input */
+            --color-subtle-cyan: #008c99;
+            /* Very muted cyan for accents */
+            --color-text-light: #e0e0e0;
+            /* Off-white for main text */
+            --color-text-dark: #666666;
+            /* Dark gray for history text */
+            --color-code-bg: #0d0d0d;
+            /* Background for code blocks (almost black) */
+            --color-user-text: #ffffff;
+            /* Pure white for user input */
             --sidebar-width: 250px;
         }
 
@@ -30,11 +38,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-           font-family: 'Google Sans', sans-serif;
+            font-family: 'Google Sans', sans-serif;
             font-weight: 400;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             width: 100%;
             overflow: hidden;
@@ -54,8 +63,8 @@
         /* MAIN LAYOUT (FULL SCREEN) */
         .main-layout {
             display: flex;
-            width: 100%; 
-            height: 100vh; 
+            width: 100%;
+            height: 100vh;
             background: var(--color-black-bg);
         }
 
@@ -64,7 +73,8 @@
             width: var(--sidebar-width);
             min-width: var(--sidebar-width);
             background: var(--color-dark-panel);
-            border-right: 1px solid #333333; /* Darker border */
+            border-right: 1px solid #333333;
+            /* Darker border */
             padding: 15px;
             display: flex;
             flex-direction: column;
@@ -74,13 +84,13 @@
         .sidebar h3 {
             color: var(--color-text-light);
             margin-bottom: 10px;
-            text-align: left; 
+            text-align: left;
             font-size: 1.1em;
         }
-        
+
         .new-chat-button {
-            background-color: transparent; 
-            color: var(--color-text-light); 
+            background-color: transparent;
+            color: var(--color-text-light);
             border: 1px solid #333333;
             padding: 8px 12px;
             border-radius: 4px;
@@ -95,14 +105,14 @@
             background-color: #2b2b2b;
             border-color: var(--color-subtle-cyan);
         }
-        
+
         .new-chat-button i {
             margin-right: 8px;
             color: var(--color-subtle-cyan);
         }
 
         .chat-history-list {
-            flex-grow: 1; 
+            flex-grow: 1;
             overflow-y: auto;
             list-style: none;
             padding: 0;
@@ -125,7 +135,8 @@
             text-overflow: ellipsis;
         }
 
-        .chat-history-item:hover, .chat-history-item.active {
+        .chat-history-item:hover,
+        .chat-history-item.active {
             background-color: #2b2b2b;
             color: var(--color-text-light);
         }
@@ -142,18 +153,19 @@
         /* Message List is Centered and Padded */
         .message-list {
             flex-grow: 1;
-            padding: 40px 10%; 
+            padding: 40px 10%;
             overflow-y: auto;
             list-style: none;
-            padding-bottom: 100px; 
-            max-width: 1000px; /* Constrain content width */
+            padding-bottom: 100px;
+            max-width: 1000px;
+            /* Constrain content width */
             width: 100%;
             margin: 0 auto;
         }
 
         /* MESSAGE STYLES (MODIFIED FOR BOX/NO-BOX) */
         .message-item {
-            margin-bottom: 30px; 
+            margin-bottom: 30px;
             display: flex;
             align-items: flex-start;
             max-width: 100%;
@@ -162,25 +174,27 @@
         /* AI Message: Left-aligned, no box/background */
         .message-item.ai-message {
             margin-right: auto;
-            flex-direction: row; 
+            flex-direction: row;
             text-align: left;
         }
-        
+
         /* User Message: Right-aligned, with box/background */
         .message-item.user-message {
             margin-left: auto;
-            flex-direction: row-reverse; /* Align icon/content to the right */
+            flex-direction: row-reverse;
+            /* Align icon/content to the right */
             text-align: right;
         }
-        
+
         /* HIDDEN ICONS (Removed the AI/U circles as requested) */
         .message-item .icon {
-            display: none; /* Hide the AI/U circles */
+            display: none;
+            /* Hide the AI/U circles */
         }
-        
+
         /* Default content styles (for AI - no background/box) */
         .message-item .content {
-            padding: 0; 
+            padding: 0;
             border-radius: 0;
             box-shadow: none;
             max-width: 750px;
@@ -188,17 +202,21 @@
             line-height: 1.6;
             font-size: 1.1em;
             color: var(--color-text-light);
-            text-align: left; /* AI content is left-aligned */
+            text-align: left;
+            /* AI content is left-aligned */
         }
-        
+
         /* User Content Styles (ADD THE BOX/BACKGROUND) */
         .message-item.user-message .content {
             /* Add the box styles to the user message */
-            background-color: var(--color-subtle-cyan); 
-            color: var(--color-black-bg); /* Dark text on light-cyan background */
-            padding: 10px 15px; 
-            border-radius: 15px 15px 0 15px; /* Bubble style */
-            text-align: left; /* Ensure the text flows left-to-right inside the bubble */
+            background-color: var(--color-subtle-cyan);
+            color: var(--color-black-bg);
+            /* Dark text on light-cyan background */
+            padding: 10px 15px;
+            border-radius: 15px 15px 0 15px;
+            /* Bubble style */
+            text-align: left;
+            /* Ensure the text flows left-to-right inside the bubble */
             font-weight: 500;
         }
 
@@ -209,12 +227,14 @@
             padding: 15px;
             border-radius: 6px;
             border: 1px solid #333;
-            margin-top: 10px; /* Space above code block */
+            margin-top: 10px;
+            /* Space above code block */
             font-size: 0.9em;
             overflow-x: auto;
-            text-align: left; /* Important for code blocks to align left */
+            text-align: left;
+            /* Important for code blocks to align left */
         }
-        
+
         .code-block-container pre {
             margin: 0;
             padding: 0;
@@ -225,7 +245,7 @@
             font-family: 'Roboto Mono', monospace;
             font-size: 1em;
         }
-        
+
         .code-copy-btn {
             position: absolute;
             top: 5px;
@@ -241,7 +261,7 @@
             transition: opacity 0.2s, background 0.2s;
             z-index: 10;
         }
-        
+
         .code-copy-btn:hover {
             opacity: 1.0;
             background: var(--color-subtle-cyan);
@@ -256,13 +276,13 @@
             left: var(--sidebar-width);
             right: 0;
             display: flex;
-            padding: 15px 5%; 
+            padding: 15px 5%;
             border-top: 1px solid #333;
             background: var(--color-black-bg);
             justify-content: center;
             z-index: 20;
         }
-        
+
         .input-wrapper {
             display: flex;
             width: 100%;
@@ -278,11 +298,11 @@
             color: var(--color-text-light);
             margin-right: 10px;
             outline: none;
-            box-shadow: none; 
+            box-shadow: none;
             font-size: 1em;
             transition: border-color 0.2s;
         }
-        
+
         #InpBtn:focus {
             border-color: var(--color-subtle-cyan);
         }
@@ -299,7 +319,10 @@
             font-weight: 600;
             transition: background 0.2s;
         }
-        #Btn:hover { background: #00b4c7; }
+
+        #Btn:hover {
+            background: #00b4c7;
+        }
 
         /* SPLASH SCREEN STYLES (GIF IN MIDDLE) */
         .splash-screen {
@@ -317,10 +340,11 @@
         }
 
         .splash-screen img {
-            width: 250px; 
+            width: 250px;
             height: auto;
             object-fit: contain;
-            filter: drop-shadow(0 0 25px var(--color-subtle-cyan)); /* Use subtle cyan shadow */
+            filter: drop-shadow(0 0 25px var(--color-subtle-cyan));
+            /* Use subtle cyan shadow */
             margin-bottom: 30px;
         }
 
@@ -348,11 +372,14 @@
             transition: transform 0.2s;
             box-shadow: 0 5px 20px rgba(0, 140, 153, 0.4);
         }
-        .splash-screen button:hover { transform: scale(1.05); }
+
+        .splash-screen button:hover {
+            transform: scale(1.05);
+        }
 
         /* TYPING INDICATOR */
         .typing-indicator {
-            display: none; 
+            display: none;
             margin-bottom: 20px;
             align-self: flex-start;
             padding-left: 10%;
@@ -360,18 +387,18 @@
             width: 100%;
             margin: 0 auto;
             position: absolute;
-            bottom: 85px; 
+            bottom: 85px;
         }
-        
+
         .typing-indicator-wrapper {
             display: flex;
             align-items: center;
         }
-        
+
         /* The AI icon for the indicator is kept, but the message icons are removed */
         .typing-indicator .icon {
             background-color: var(--color-subtle-cyan);
-            margin-right: 15px; 
+            margin-right: 15px;
             width: 30px;
             height: 30px;
             min-width: 30px;
@@ -383,7 +410,7 @@
             font-weight: 500;
             color: var(--color-black-bg);
         }
-        
+
         .typing-indicator .thinking-dots {
             display: flex;
             align-items: center;
@@ -401,61 +428,84 @@
             border-radius: 50%;
             margin: 0 4px;
             display: inline-block;
-            opacity: 0.5; /* Added: Start slightly transparent */
+            opacity: 0.5;
+            /* Added: Start slightly transparent */
             animation: pulse 1s infinite ease-in-out;
         }
-        
+
         /* Added: Stagger the animation timing for the three dots */
         .dot:nth-child(2) {
             animation-delay: 0.2s;
         }
-        
+
         .dot:nth-child(3) {
             animation-delay: 0.4s;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1.0); opacity: 1.0; }
-            50% { transform: scale(0.8); opacity: 0.5; }
+
+            0%,
+            100% {
+                transform: scale(1.0);
+                opacity: 1.0;
+            }
+
+            50% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
         }
-        
+
         /* Media Query for smaller screens (to adjust padding/sidebar) */
         @media (max-width: 768px) {
             :root {
-                --sidebar-width: 60px; /* Collapse sidebar */
+                --sidebar-width: 60px;
+                /* Collapse sidebar */
             }
+
             .sidebar {
                 width: var(--sidebar-width);
                 min-width: var(--sidebar-width);
             }
-            .sidebar h3, .new-chat-button span, .chat-history-item {
-                display: none; /* Hide text in collapsed sidebar */
+
+            .sidebar h3,
+            .new-chat-button span,
+            .chat-history-item {
+                display: none;
+                /* Hide text in collapsed sidebar */
             }
+
             .new-chat-button {
                 text-align: center;
                 padding: 10px 0;
             }
+
             .new-chat-button i {
                 margin-right: 0;
             }
+
             .chat-history-list {
                 border-top: none;
                 padding-top: 0;
             }
+
             .chat-input-area {
                 left: var(--sidebar-width);
                 padding: 15px 20px;
             }
-            .message-list, .typing-indicator {
-                padding: 20px 20px 100px 20px; /* Less padding on small screen */
+
+            .message-list,
+            .typing-indicator {
+                padding: 20px 20px 100px 20px;
+                /* Less padding on small screen */
                 /* Fix: Ensure typing indicator also respects new bottom positioning on small screens */
                 bottom: 85px;
             }
+
             .typing-indicator {
                 padding-left: 20px;
             }
         }
-        
     </style>
 </head>
 
@@ -464,13 +514,13 @@
     <div class="main-layout">
         <aside class="sidebar">
             <h3>JARVIS History</h3>
-            
+
             <button id="new-chat-btn" class="new-chat-button">
                 <i class="bi bi-plus-circle-fill"></i> <span>New Chat</span>
             </button>
 
             <ul id="chat-history-list" class="chat-history-list">
-                </ul>
+            </ul>
         </aside>
 
         <section class="chat-area">
@@ -483,8 +533,8 @@
             </div>
 
             <ul id="message-list" class="message-list" style="display: none;">
-                </ul>
-            
+            </ul>
+
             <div id="typing-indicator" class="typing-indicator">
                 <div class="typing-indicator-wrapper">
                     <div class="icon">AI</div>
@@ -546,7 +596,7 @@
             splashScreen.style.display = 'none';
             messageList.style.display = 'block';
             inputArea.style.display = 'flex';
-            
+
             // Clear current messages for a fresh start and add welcome
             // The welcome message is AI, so it uses the 'ai-message' class and is unboxed
             messageList.innerHTML = `
@@ -554,12 +604,12 @@
                     <div class="icon">AI</div>
                     <div class="content">Hello! I am JARVIS, your virtual assistant. How can I help you today?</div>
                 </li>`;
-            
+
             scrollToBottom();
             inputField.focus();
             chatActive = true;
         }
-        
+
         // Function to go back to the splash screen (for "New Chat" button)
         function resetChatUI() {
             splashScreen.style.display = 'flex';
@@ -570,17 +620,22 @@
             typingIndicator.style.display = 'none';
         }
 
-        // 💡💡💡 NEW FUNCTION: Format subtopics with bold tags (<b>) 💡💡💡
+        // 💡💡💡 UPDATED FUNCTION: Format subtopics with bold tags and ensure new lines 💡💡💡
         function formatSubtopics(text) {
-            // This regex finds the pattern: * [Text]:
-            // E.g., it captures "Identity" from "* Identity: "
-            const subtopicRegex = /\* (.*?):/g;
-            
+            // Step 1: Ensure there is a line break before every list item starting with *
+            // It looks for any character (excluding a newline) followed by a space and an asterisk
+            // and replaces it with that character, a newline, and the asterisk.
+            let processedText = text.replace(/([^\n])\s*\*/g, '$1\n*');
+
+            // Step 2: Apply bolding to the subtopic pattern * [Text]:
             // The replacement wraps the captured group (the subtopic name) in bold tags.
-            // Result: "<b>* Identity:</b>"
-            return text.replace(subtopicRegex, '<b>* $1:</b>');
+            const finalResult = processedText.replace(/\* (.*?):/g, '<b>* $1:</b>');
+
+            // Step 3 (Optional but recommended for better look): Replace remaining single \n with <br>
+            // This ensures any other newlines (like between list items after the colon) are also respected.
+            return finalResult.replace(/\n/g, '<br>');
         }
-        // 💡💡💡 END NEW FUNCTION 💡💡💡
+        // 💡💡💡 END UPDATED FUNCTION 💡💡💡
 
         // 💡💡💡 CORE LOGIC FOR CODE BLOCKS (Existing Function) 💡💡💡
         function formatCodeBlocks(text) {
@@ -590,7 +645,7 @@
             // Function to generate the HTML for a code block
             function createCodeHtml(match, codeContent) {
                 const sanitizedCode = codeContent.trim();
-                
+
                 return `
                     <div class="code-block-container">
                         <button class="code-copy-btn" onclick="copyCode(this)">
@@ -605,12 +660,12 @@
 
             return htmlContent;
         }
-        
+
         // Copy to clipboard function (called by the copy button)
-        window.copyCode = function(button) {
-            const preElement = button.nextElementSibling; 
+        window.copyCode = function (button) {
+            const preElement = button.nextElementSibling;
             const textToCopy = preElement.innerText;
-            
+
             navigator.clipboard.writeText(textToCopy).then(() => {
                 button.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
                 setTimeout(() => {
@@ -629,7 +684,7 @@
             const listItem = document.createElement('li');
             listItem.classList.add('message-item');
             listItem.classList.add(isUser ? 'user-message' : 'ai-message');
-            
+
             // The icon is now hidden by CSS, but we keep the element structure for consistency
             const iconDiv = document.createElement('div');
             iconDiv.classList.add('icon');
@@ -637,7 +692,7 @@
 
             const contentDiv = document.createElement('div');
             contentDiv.classList.add('content');
-            
+
             if (isUser) {
                 // User text is plain text, which will be styled as a box by CSS
                 contentDiv.innerText = text;
@@ -647,7 +702,7 @@
                 // 💡💡💡 CHANGE APPLIED HERE: Chain subtopic formatting before code blocks 💡💡💡
                 let processedText = formatSubtopics(text);
                 contentDiv.innerHTML = formatCodeBlocks(processedText);
-                
+
                 listItem.appendChild(iconDiv); // Icon is hidden but kept in structure
                 listItem.appendChild(contentDiv);
             }
@@ -663,35 +718,35 @@
             try {
                 // 1. Display user message immediately
                 appendMessage(userInput, true);
-                
+
                 // 2. Clear input field immediately after displaying
                 inputField.value = '';
 
                 // 3. Show typing indicator 
-                typingIndicator.style.display = 'flex'; 
+                typingIndicator.style.display = 'flex';
                 scrollToBottom();
 
                 // Disable input/send button while waiting
                 inputField.disabled = true;
                 sendButton.disabled = true;
-                
+
                 const response = await fetch("/response/", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken 
+                        'X-CSRFToken': csrftoken
                     },
                     body: JSON.stringify({ user_input: userInput })
                 });
 
                 const data = await response.json();
-                
+
                 // 4. Hide typing indicator
                 typingIndicator.style.display = 'none';
 
                 // 5. Display AI response, running it through the new formatting chain
                 appendMessage(data.reply, false);
-                
+
                 // 6. Re-enable input/send button
                 inputField.disabled = false;
                 sendButton.disabled = false;
@@ -700,12 +755,12 @@
 
             } catch (err) {
                 console.error("Fetch Error:", err);
-                
+
                 // Ensure everything is reset on error
-                typingIndicator.style.display = 'none'; 
+                typingIndicator.style.display = 'none';
                 inputField.disabled = false;
                 sendButton.disabled = false;
-                
+
                 appendMessage("Error: Could not connect to the AI. Please check the server.", false);
             }
         }
@@ -727,13 +782,13 @@
                 }
             }
         });
-        
+
         // Event listener for the "Start Chatting" button on the splash screen
         startChatButton.addEventListener('click', startNewChat);
 
         // Event listener for the "New Chat" button in the sidebar (resets the UI)
         newChatButton.addEventListener('click', resetChatUI);
-        
+
         // Initial setup on load (show splash screen)
         window.onload = resetChatUI;
     </script>

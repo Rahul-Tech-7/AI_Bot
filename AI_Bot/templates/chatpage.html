@@ -620,20 +620,29 @@
             typingIndicator.style.display = 'none';
         }
 
-        // 💡💡💡 UPDATED FUNCTION: Format subtopics with bold tags and ensure new lines 💡💡💡
+        // 💡💡💡 UPDATED FUNCTION: Format subtopics with bold tags, new lines, and removes leading asterisks 💡💡💡
         function formatSubtopics(text) {
-            // Step 1: Ensure there is a line break before every list item starting with *
-            // It looks for any character (excluding a newline) followed by a space and an asterisk
-            // and replaces it with that character, a newline, and the asterisk.
-            let processedText = text.replace(/([^\n])\s*\*/g, '$1\n*');
+            // 1. CLEANUP PASS: Remove all stray ** (markdown bolding). This handles the messy AI output.
+            let cleanedText = text.replace(/\*\*/g, '');
 
-            // Step 2: Apply bolding to the subtopic pattern * [Text]:
-            // The replacement wraps the captured group (the subtopic name) in bold tags.
-            const finalResult = processedText.replace(/\* (.*?):/g, '<b>* $1:</b>');
+            // 2. BOLDING & LINE BREAK PASS: Find the subtopic pattern (* [text]:)
+            // This regex looks for: 
+            // - `(\n|^)` (line break or start of string, captured in $1)
+            // - `\*\s*` (the list marker * and optional spaces, which we remove by not including them in the replacement)
+            // - `(.*?):` (the subtopic title and colon, captured in $2)
+            const subtopicRegex = /(\n|^)\*\s*(.*?):/g;
 
-            // Step 3 (Optional but recommended for better look): Replace remaining single \n with <br>
-            // This ensures any other newlines (like between list items after the colon) are also respected.
-            return finalResult.replace(/\n/g, '<br>');
+            let formattedText = cleanedText.replace(subtopicRegex, (match, p1, p2) => {
+                // p2 is the subtopic title (e.g., "What I can do")
+
+                // We return a line break (<br>), followed by the HTML bolded title.
+                // The original `*` is now gone, and the line is forcefully broken.
+                return '<br><b>' + p2.trim() + ':</b>';
+            });
+
+            // 3. GENERAL LINE BREAK PASS: Replace all remaining single \n with <br> for all other text.
+            // This is important to correctly break the body text that follows the subtopic.
+            return formattedText.replace(/\n/g, '<br>');
         }
         // 💡💡💡 END UPDATED FUNCTION 💡💡💡
 
